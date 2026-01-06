@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Builder\PayregEmployeeBuilder;
 use App\Entities\Employee\Employee;
+use App\Factory\Payroll\DailyRateStrategyFactory;
+use App\Factory\Payroll\RestDayStrategyFactory;
+use App\Repositories\DTR\DailyTimeRecordRepository;
 use App\Repositories\Employee\NonConfiRepository;
 use App\Repositories\PayrollRegister\PayrollRegisterRepository;
 
@@ -11,7 +14,10 @@ class NonConfiService
 {
     //
 
-    public function __construct(protected NonConfiRepository $nonConfiRepository,protected PayrollRegisterRepository $payrollRegisterRepository) {
+    public function __construct(
+        protected NonConfiRepository $nonConfiRepository,
+        protected PayrollRegisterRepository $payrollRegisterRepository,
+        protected DailyTimeRecordRepository $dailyTimeRecordRepository) {
       
     }
 
@@ -22,13 +28,36 @@ class NonConfiService
         $schema = $this->payrollRegisterRepository->getSchema('unposted');
 
         foreach($employees as $employee) {
-
             $employeeObj = new Employee($this->nonConfiRepository->find($employee->biometric_id));
-
+            $dailyRateStrategy = DailyRateStrategyFactory::getStrategy($employee->pay_type);
             $builder = new PayregEmployeeBuilder();
+            
+            $dtr = $this->dailyTimeRecordRepository->getDTRByPeriodAndEmployee($period,$employee);
+            $restDayStrategy = RestDayStrategyFactory::getStrategy($employee->pay_type);
 
             $builder->setEmployee($employeeObj)
-                    ->setSchema($schema);
+                    ->setDailyRateStrategy($dailyRateStrategy)
+                    ->setEmployeeDailyTimeRecord($dtr)
+                    ->setSchema($schema)
+                    ->setRates()
+
+                    ->computeLateAmount()
+                    ->computeUnderTimeAmount()
+                    ->computeVacationLeaveAmount()
+                    ->computeSickLeaveAmount()
+                    ->computeBirthdayLeaveAmount()
+                    ->computeBereavementLeaveAmount()
+                    ->computeAbsenceAmount()
+                    ->computeReglarOverTimeAmount()
+                    ->computeRegularNightDifferentialAmount()
+                    ->computeRestDayAmount($restDayStrategy)
+
+                    ->getFields()
+                   
+                    // ->computeSVLAmount()
+                    
+                    
+                    ;
 
 
             /*

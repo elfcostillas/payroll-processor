@@ -24,7 +24,7 @@ class NonConfiRepository
     */
 
     public function getAllActive() {
-        return DB::table('employees')->where('emp_level',5)->where('exit_status',1);
+        return DB::table('employees')->where('emp_level',5)->where('exit_status',1)->where('biometric_id',847);
     }
 
     /**

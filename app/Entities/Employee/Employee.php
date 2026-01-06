@@ -15,7 +15,8 @@ class Employee
     /**
      * 2 = Daily
      * 1 = Semi Monthly
-     * **/
+     **/
+    
     public function getPayType(){
         return $this->stdObject->pay_type;
     }

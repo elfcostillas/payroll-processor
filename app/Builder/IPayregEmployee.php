@@ -5,13 +5,34 @@ namespace App\Builder;
 interface IPayregEmployee
 {
     //
-    public function computeLate();
+    public function computeLateAmount();
 
-    public function computeUnderTime();
+    public function computeUnderTimeAmount();
 
-    public function computeAbsence();
+    public function computeAbsenceAmount();
 
     public function computeBasicPay();
+
+    public function computeVacationLeaveAmount();
+
+    public function computeSickLeaveAmount();
+
+    public function computeSVLAmount();
+
+    public function computeBirthdayLeaveAmount();
+
+    public function computeBereavementLeaveAmount();
+
+    public function computeReglarOverTimeAmount();
+
+    public function computeRegularNightDifferentialAmount();
+
+    public function getFields();
+
+
+
+
+
 
     // public function computeOverTime();
 

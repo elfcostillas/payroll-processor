@@ -18,7 +18,7 @@ class ProcessController extends Controller
     public function process($employee_type, $period_id) {
 
         $period = $this->payrollPeriodRepository->find($period_id);
-
+      
         $service = match ($employee_type) {
             'confi' => $this->confiService,
             'non-confi' => $this->nonConfiService
