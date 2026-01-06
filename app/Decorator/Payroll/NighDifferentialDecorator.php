@@ -21,6 +21,10 @@ class NighDifferentialDecorator implements IHours
 
     public function compute()
     {
-        return ($this->getType() == 'overtime') ? $this->hours->compute() * 1.1 : $this->hours->compute() * 0.1 ; 
+        return match($this->getType()){
+            'overtime' => $this->hours->compute() * 1.1 ,
+            'regular' => $this->hours->compute() * 0.1 ,
+            'restday' => $this->hours->compute() * 0.1 ,
+        };
     }
 }

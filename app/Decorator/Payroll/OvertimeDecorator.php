@@ -21,6 +21,10 @@ class OvertimeDecorator implements IHours
 
     public function compute()
     {
-        return $this->hours->compute() * 1.25; 
+        return match($this->getType()){
+            'overtime' => $this->hours->compute() * 1.25 ,
+            'regular' => $this->hours->compute() * 1.25 ,
+            'overtime-restday' => $this->hours->compute() * 1.3,
+        };
     }
 }
