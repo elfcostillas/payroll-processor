@@ -27,6 +27,8 @@ interface IPayregEmployee
 
     public function computeRegularNightDifferentialAmount();
 
+    public function computeLegalHolidayHrsAndPremiumAmount();
+
     public function getFields();
 
 

@@ -3,6 +3,7 @@
 namespace App\Builder;
 use App\Builder\IPayregEmployee;
 use App\Decorator\Payroll\Hours;
+use App\Decorator\Payroll\LegalHolidayDecorator;
 use App\Decorator\Payroll\NighDifferentialDecorator;
 use App\Decorator\Payroll\OvertimeDecorator;
 use App\Decorator\Payroll\RestDayDecorator;
@@ -146,7 +147,7 @@ class PayregEmployeeBuilder implements IPayregEmployee
         
         $this->fields['reg_ot'] = (float) $this->dtr->over_time;
         
-        $hours = new Hours($this->dtr->over_time,$this->rates['hourly_rate'],'overtime',$this->employeeObject->getPayType());
+        $hours = new Hours($this->dtr->over_time,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'REGULARDAY');
         $overtime = new OvertimeDecorator($hours);
         
         $this->fields['reg_ot_amount'] = round($overtime->compute(),2);
@@ -157,17 +158,55 @@ class PayregEmployeeBuilder implements IPayregEmployee
     public function computeRegularNightDifferentialAmount()
     {
         $this->fields['reg_nd'] = (float) $this->dtr->night_diff;
-        $hours = new Hours($this->dtr->night_diff,$this->rates['hourly_rate'],'regular',$this->employeeObject->getPayType());
-        $nightdiff = new NighDifferentialDecorator($hours);
-        $this->fields['reg_nd_amount'] = round($nightdiff->compute() ,2);
+        $nd = new NighDifferentialDecorator(new Hours($this->dtr->night_diff,$this->rates['hourly_rate'],'NIGHTSHIFT',$this->employeeObject->getPayType(),'REGULARDAY'));
+        $this->fields['reg_nd_amount'] = round($nd->compute(),2);
 
         $this->fields['reg_ndot'] = (float) $this->dtr->night_diff_ot;
-        $nightDiffOT = new OvertimeDecorator(new NighDifferentialDecorator(new Hours($this->dtr->night_diff_ot,$this->rates['hourly_rate'],'overtime',$this->employeeObject->getPayType())));
-        
-        $this->fields['reg_ndot_amount'] = round($nightDiffOT->compute() ,2);
-        
-        return $this;
+        $nd_ot = new OvertimeDecorator(new NighDifferentialDecorator (new Hours($this->dtr->night_diff_ot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'REGULARDAY')));
+        $this->fields['reg_ndot_amount'] = round($nd_ot->compute(),2);
 
+        return $this;
+    }
+
+    public function computeLegalHolidayHrsAndPremiumAmount()
+    {
+
+        $this->fields['leghol_count'] = (float) $this->dtr->reghol_pay;
+        $this->fields['leghol_count_amount'] = (float) $this->dtr->reghol_pay * $this->rates['daily_rate'];
+
+        $this->fields['leghol_hrs'] = (float) $this->dtr->reghol_hrs;
+        $leghol = new LegalHolidayDecorator(new Hours($this->dtr->reghol_hrs,$this->rates['hourly_rate'],'REGULARTIME',$this->employeeObject->getPayType(),'HOLIDAY'));
+        $this->fields['leghol_hrs_amount'] = round($leghol->compute(),2);
+
+        $this->fields['leghol_ot'] = (float) $this->dtr->reghol_ot;
+        $leghol_ot = new OvertimeDecorator(new LegalHolidayDecorator(new Hours($this->dtr->reghol_ot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'HOLIDAY')));
+        $this->fields['leghol_ot_amount'] = round($leghol_ot->compute(),2);
+
+        $this->fields['leghol_nd'] = (float) $this->dtr->reghol_nd;
+        $leghol_nd =  new NighDifferentialDecorator(new OvertimeDecorator(new LegalHolidayDecorator(new Hours($this->dtr->reghol_nd,$this->rates['hourly_rate'],'NIGHTSHIFT',$this->employeeObject->getPayType(),'HOLIDAY'))));
+        $this->fields['leghol_nd_amount'] = round( $leghol_nd->compute(),2);
+
+        $this->fields['leghol_rd'] = (float) $this->dtr->reghol_rd;
+        $leghol_rd =  new RestDayDecorator(new LegalHolidayDecorator(new Hours($this->dtr->reghol_nd,$this->rates['hourly_rate'],'REGULARTIME',$this->employeeObject->getPayType(),'HOLIDAY')));
+        $this->fields['leghol_rd_amount'] = round($leghol_rd->compute(),2);
+
+        $this->fields['leghol_rdot'] = (float) $this->dtr->reghol_rdot;
+        $leghol_rdot = new OvertimeDecorator(new RestDayDecorator(new LegalHolidayDecorator(new Hours($this->dtr->reghol_rdot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'RESTDAY'))));
+        $this->fields['leghol_rdot_amount'] = round($leghol_rdot->compute(),2);
+
+        $this->fields['leghol_ndot'] = (float) $this->dtr->reghol_ndot;
+        $reghol_ndot =  new OvertimeDecorator(new NighDifferentialDecorator(new LegalHolidayDecorator(new Hours($this->dtr->reghol_ndot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'HOLIDAY'))));
+        $this->fields['leghol_ndot_amount'] = round($reghol_ndot->compute(),2);
+
+        $this->fields['leghol_rdnd'] = (float) $this->dtr->reghol_rdnd;
+        $reghol_rdnd = new LegalHolidayDecorator(new NighDifferentialDecorator(new RestDayDecorator(new Hours($this->dtr->reghol_ndot,$this->rates['hourly_rate'],'NIGHTSHIFT',$this->employeeObject->getPayType(),'RESTDAY'))));
+        $this->fields['leghol_rdnd_amount'] =  round($reghol_rdnd->compute(),2);
+
+
+//           "leghol_rdndot" => null
+//   "leghol_rdndot_amount" => null
+
+        return $this;
     }
 
     public function computeBasicPay()
@@ -175,31 +214,23 @@ class PayregEmployeeBuilder implements IPayregEmployee
 
     }
 
-    public function computeRestDayAmount($restDayStrategy)
+    public function computeRestDayAmount()
     {
-        /*
-        restday_hrs , restday_ot , restday_nd , restday_ndot
-
-        rd_ot_amount
-        */
-         /* Restday */
         $this->fields['rd_hrs'] = (float) $this->dtr->restday_hrs;
-        
-        $restDay = new RestDayDecorator(new Hours($this->dtr->restday_hrs,$this->rates['hourly_rate'],'overtime',$this->employeeObject->getPayType()));
-        // $this->fields['rd_hrs_amount'] = $restDayStrategy->compute($this->rates['hourly_rate'], (float) $this->dtr->restday_hrs);
-        // $this->fields['rd_hrs_amount'] = $restDayStrategy->compute($this->rates['hourly_rate'], (float) $this->dtr->restday_hrs);
-        $this->fields['rd_hrs_amount'] = round($restDay->compute(),2);
-    
-        /* Restday Overtime */
+        $rd = new RestDayDecorator(new Hours($this->dtr->restday_hrs,$this->rates['hourly_rate'],'REGULARTIME',$this->employeeObject->getPayType(),'RESTDAY'));
+        $this->fields['rd_hrs_amount'] = round($rd->compute(),2);
+       
         $this->fields['rd_ot'] = (float) $this->dtr->restday_ot;
-        $this->fields['rd_ot_amount'] = round((float) $this->dtr->restday_ot * $this->rates['hourly_rate'] * 1.3 * 1.3 ,2);
+        $rd_ot = new OvertimeDecorator(new RestDayDecorator(new Hours($this->dtr->restday_ot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'RESTDAY')));
+        $this->fields['rd_ot_amount'] = round($rd_ot->compute(),2);
 
-        /*RestDay Night Shift*/
         $this->fields['rd_nd'] = (float) $this->dtr->restday_nd;
-        $this->fields['rd_nd_amount'] = round( (float) $this->dtr->restday_nd * $this->rates['hourly_rate'] * 0.1 * 1.3 ,2);
-        
+        $rd_nd = new NighDifferentialDecorator(new RestDayDecorator(new Hours($this->dtr->restday_nd,$this->rates['hourly_rate'],'NIGHTSHIFT',$this->employeeObject->getPayType(),'RESTDAY')));
+        $this->fields['rd_nd_amount'] = round($rd_nd->compute(),2);
+
         $this->fields['rd_ndot'] = (float) $this->dtr->restday_ndot;
-        $this->fields['rd_ndot_amount'] = round((float) $this->dtr->restday_nd * $this->rates['hourly_rate'] * 1.1 * 1.3 * 1.25 ,2);
+        $rd_ndot = new OvertimeDecorator(new NighDifferentialDecorator(new RestDayDecorator(new Hours($this->dtr->restday_ndot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'RESTDAY'))));
+        $this->fields['rd_ndot_amount'] = round($rd_ndot->compute(),2);
 
         return $this;
     }
@@ -239,7 +270,7 @@ class PayregEmployeeBuilder implements IPayregEmployee
   +"reghol_rd": "0.00"
   +"reghol_rdnd": "0.00"
   +"reghol_rdot": "0.00"
-  +"reghol_nd": "0.00"
+  +"": "0.00"
   +"reghol_ndot": "0.00"
   +"sphol_pay": "0.00"
   +"sphol_hrs": "0.00"

@@ -50,7 +50,8 @@ class NonConfiService
                     ->computeAbsenceAmount()
                     ->computeReglarOverTimeAmount()
                     ->computeRegularNightDifferentialAmount()
-                    ->computeRestDayAmount($restDayStrategy)
+                    ->computeRestDayAmount()
+                    ->computeLegalHolidayHrsAndPremiumAmount()
 
                     ->getFields()
                    
