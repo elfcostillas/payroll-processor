@@ -52,6 +52,7 @@ class NonConfiService
                     ->computeRegularNightDifferentialAmount()
                     ->computeRestDayAmount()
                     ->computeLegalHolidayHrsAndPremiumAmount()
+                    ->computeSpecialHolidayAndPremumAmount()
 
                     ->getFields()
                    

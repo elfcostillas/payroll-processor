@@ -26,7 +26,7 @@ class RestDayDecorator extends HoursDecorator implements IHours
                 return  $this->hours->compute() * 2.6;
             }
         
-            return  $this->hours->compute() * 1.3;
+            return  $this->hours->compute() * 1.3; // restday + holiday 
 
         }else{
             return $this->hours->compute() * 1.3;

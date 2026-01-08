@@ -7,6 +7,8 @@ use App\Decorator\Payroll\LegalHolidayDecorator;
 use App\Decorator\Payroll\NighDifferentialDecorator;
 use App\Decorator\Payroll\OvertimeDecorator;
 use App\Decorator\Payroll\RestDayDecorator;
+use App\Decorator\Payroll\SpecialHolidayDecorator;
+use App\Decorator\Payroll\SpecialHolidayRestDayDecorator;
 
 class PayregEmployeeBuilder implements IPayregEmployee
 {
@@ -202,9 +204,57 @@ class PayregEmployeeBuilder implements IPayregEmployee
         $reghol_rdnd = new LegalHolidayDecorator(new NighDifferentialDecorator(new RestDayDecorator(new Hours($this->dtr->reghol_ndot,$this->rates['hourly_rate'],'NIGHTSHIFT',$this->employeeObject->getPayType(),'RESTDAY'))));
         $this->fields['leghol_rdnd_amount'] =  round($reghol_rdnd->compute(),2);
 
+        $this->fields['leghol_rdndot'] = (float) $this->dtr->reghol_rdndot;
+        $leghol_rdndot = new OvertimeDecorator(new LegalHolidayDecorator(new NighDifferentialDecorator(new RestDayDecorator(new Hours($this->dtr->reghol_rdndot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'RESTDAY')))));
+        $this->fields['leghol_rdndot_amount'] =  round($leghol_rdndot->compute(),2);
 
 //           "leghol_rdndot" => null
 //   "leghol_rdndot_amount" => null
+
+        return $this;
+    }
+
+    public function computeSpecialHolidayAndPremumAmount()
+{   
+        $this->fields['sphol_count'] = (float) $this->dtr->sphol_pay;
+        $this->fields['sphol_count_amount'] = (float) $this->dtr->sphol_pay * $this->rates['daily_rate'];
+
+        $this->fields['sphol_hrs'] = (float) $this->dtr->sphol_hrs;
+        $sphol = new SpecialHolidayDecorator(new Hours($this->dtr->sphol_hrs,$this->rates['hourly_rate'],'REGULARTIME',$this->employeeObject->getPayType(),'HOLIDAY'));
+        $this->fields['sphol_hrs_amount'] = round($sphol->compute(),2);
+
+        $this->fields['sphol_ot'] = (float) $this->dtr->sphol_ot;
+        $sphol_ot = new OvertimeDecorator(new SpecialHolidayDecorator(new Hours($this->dtr->sphol_ot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'HOLIDAY')));
+        $this->fields['sphol_ot_amount'] = round($sphol_ot->compute(),2);
+
+        $this->fields['sphol_rd'] = (float) $this->dtr->sphol_rd;
+        $sphol_rd = new SpecialHolidayRestDayDecorator(new Hours($this->dtr->sphol_rd,$this->rates['hourly_rate'],'REGULARTIME',$this->employeeObject->getPayType(),'HOLIDAY'));
+        $this->fields['sphol_rd_amount'] = round($sphol_rd->compute(),2);
+        /*
+ 
+        +"": "0.00"
+        +"": "0.00"
+        +"": "0.00"
+        +"sphol_rdnd": "0.00"
+        +"sphol_rdot": "0.00"
+        +"sphol_nd": "0.00"
+        +"sphol_ndot": "0.00"
+
+        
+        
+
+        sphol_nd
+        sphol_nd_amount
+
+        
+        
+
+        sphol_ndot
+        sphol_ndot_amount
+
+        sphol_rd
+        sphol_rd_amount
+*/
 
         return $this;
     }
