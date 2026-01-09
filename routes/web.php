@@ -19,5 +19,5 @@ Route::get('/', function () {
 });
 
 
-Route::get('/process/{employee_type}/{period_id}', [ProcessController::class, 'process']);
+Route::get('/process/{employee_type}/{period_id}/{user_id?}', [ProcessController::class, 'process']);
 

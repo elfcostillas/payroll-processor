@@ -11,7 +11,7 @@ interface IPayregEmployee
 
     public function computeAbsenceAmount();
 
-    public function computeBasicPay();
+    public function computeBasicPay($basicPayStrategy);
 
     public function computeVacationLeaveAmount();
 

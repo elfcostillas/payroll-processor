@@ -17,6 +17,10 @@ class SpecialHolidayDecorator extends HoursDecorator implements IHours
             if($this->getDayType() == 'HOLIDAY' && $this->getHoursType() == 'OVERTIME'){
                 return  $this->hours->compute() * 1.3;
             }
+
+            if($this->getDayType() == 'HOLIDAY' && $this->getHoursType() == 'NIGHTSHIFT'){
+                return  $this->hours->compute() * 1.3;
+            }
         
             return  $this->hours->compute() * 1.5; // NIGHSHIFT + HOLIDAY 
 

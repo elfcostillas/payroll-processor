@@ -24,4 +24,14 @@ class Employee
     public function getBasicSalary(){
         return $this->stdObject->basic_salary;
     }
+
+    public function getBioId(){
+        return $this->stdObject->biometric_id;
+    }
+
+    public function getSalaryCredit()
+    {
+        return ($this->stdObject->pay_type == 1 ) ? (float) $this->stdObject->basic_salary : (float)  $this->stdObject->basic_salary * 26;
+    }
+
 }
