@@ -34,4 +34,9 @@ class Employee
         return ($this->stdObject->pay_type == 1 ) ? (float) $this->stdObject->basic_salary : (float)  $this->stdObject->basic_salary * 26;
     }
 
+    public function getField($field)
+    {
+        return $this->stdObject->$field;
+    }
+
 }

@@ -14,6 +14,7 @@ use App\Repositories\PayrollRegister\PayrollRegisterRepository;
 use App\Services\Compensation\CompensationService;
 use App\Services\Compensation\FixedCompensationService;
 use App\Services\Compensation\OtherCompensationService;
+use App\Services\Deductions\GovernmentContribution\GovernmentContributionService;
 use Illuminate\Support\Facades\DB;
 
 class NonConfiService
@@ -26,7 +27,8 @@ class NonConfiService
         protected DailyTimeRecordRepository $dailyTimeRecordRepository,
         protected FixedCompensationService $fixedCompensationService,
         protected OtherCompensationService $otherCompensationService,
-        protected CompensationService $compensationService
+        protected CompensationService $compensationService,
+        protected GovernmentContributionService $gov_contri_service
         ) {
     }
 
@@ -75,8 +77,7 @@ class NonConfiService
                     ->computeBasicPay($basicPayStrategy)
                     ->computeGrossPay($grossPayStrategy)
                     ->computeGrossTotal($this->compensationService,$user_id)
-
-                    ->computeGovernmentContributions()
+                    ->computeGovernmentContributions($this->gov_contri_service)
 
                     ->getFields()
                    

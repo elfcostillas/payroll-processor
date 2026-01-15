@@ -64,8 +64,23 @@ class PayregEmployeeBuilder implements IPayregEmployee
         return $this;
     }
 
-    public function computeGovernmentContributions()
+    public function computeGovernmentContributions($service)
     {   
+        $hdmf = $service->computeHDMF($this->period,$this->employeeObject);
+        $this->fields['hdmf_contri'] = $hdmf;
+
+        $sss = $service->computeSSS($this->period,$this->employeeObject);
+       
+        $this->fields['sss_prem'] = $sss['sss_prem'];
+        $this->fields['sss_wisp'] = $sss['sss_wisp'];
+
+        $phic = $service->computePhilHealth($this->period,$this->employeeObject);
+        $this->fields['phil_prem'] = $phic;
+
+
+
+
+        
         return $this;
     }
 
