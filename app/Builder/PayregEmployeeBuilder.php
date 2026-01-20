@@ -27,6 +27,14 @@ class PayregEmployeeBuilder implements IPayregEmployee
     protected $generated_by;
     protected $generated_on;
 
+    protected $otd_amount;
+    protected $fixed_ded_amount;
+    protected $govloan_amount;
+    protected $installments_amount;
+
+
+    
+
     /*
     * Set employee
     * @param mixed $employeeObject
@@ -46,8 +54,6 @@ class PayregEmployeeBuilder implements IPayregEmployee
         $this->fields['user_id'] = $this->generated_by;
         $this->fields['biometric_id'] = (int) $this->employeeObject->getBioId();
         $this->fields['period_id'] = (int) $this->period->id;
-
-     
 
         return $this;
     }
@@ -77,8 +83,8 @@ class PayregEmployeeBuilder implements IPayregEmployee
         $phic = $service->computePhilHealth($this->period,$this->employeeObject);
         $this->fields['phil_prem'] = $phic;
 
-
-
+        $wtax = $service->computeWTax($this->period,$this->employeeObject);
+        $this->fields['wtax'] = $wtax;
 
         
         return $this;
@@ -296,18 +302,6 @@ class PayregEmployeeBuilder implements IPayregEmployee
         $sphol_rdndot = new NighDifferentialDecorator(new OvertimeDecorator(new SpecialHolidayRestDayDecorator(new Hours($this->dtr->sphol_rdndot,$this->rates['hourly_rate'],'OVERTIME',$this->employeeObject->getPayType(),'HOLIDAY'))));
         $this->fields['sphol_rdndot_amount'] = round($sphol_rdndot->compute(),2);
         
-
-        /*
- 
-        +"": "0.00"
-        +"": "0.00"
-        +"": "0.00"
-        +"sphol_rdnd": "0.00"
-        +" ": "0.00"
-
-
-*/
-
         return $this;
     }
 
@@ -352,9 +346,53 @@ class PayregEmployeeBuilder implements IPayregEmployee
         return $this;
     }
 
+    public function computeOneTimeDeduction($service,$user_id)
+    {
+        $deductionObject = $service->getTotalLoan($this->employeeObject,$this->period,$user_id);
+        $this->otd_amount = (float) $deductionObject->amount;
+        return $this;
+    }
+
+    public function computeFixedDeduction($service,$user_id)
+    {
+        $deductionObject = $service->getTotalLoan($this->employeeObject,$this->period,$user_id);
+        $this->fixed_ded_amount = (float) $deductionObject->amount;
+
+        return $this;
+    }
+
+    public function computeGovernmentLoans($service,$user_id)
+    {
+        $deductionObject = $service->getTotalLoan($this->employeeObject,$this->period,$user_id);
+        $this->govloan_amount = (float) $deductionObject->amount;
+
+        return $this;
+    }
+
+    public function computeOfficeInstallment($service,$user_id)
+    {
+        $deductionObject = $service->getTotalLoan($this->employeeObject,$this->period,$user_id);
+        $this->installments_amount = (float) $deductionObject->amount;
+        return $this;
+    }
+
+    public function getTotalDeduction()
+    {
+        $this->fields['total_deduction'] = $this->otd_amount + $this->fixed_ded_amount + $this->govloan_amount + $this->installments_amount + 
+                                        $this->fields['hdmf_contri'] + $this->fields['sss_prem'] + $this->fields['sss_wisp'] + $this->fields['phil_prem'] + 
+                                        $this->fields['wtax'];
+        return $this;
+    }
+
+    public function getNetPay()
+    { 
+        $this->fields['net_pay'] = $this->fields['gross_total'] - $this->fields['total_deduction'];
+        return $this;
+    }
+
     public function getFields()
     {
-        dd($this->fields,$this->rates);
+        return $this->fields;
     }
 
 

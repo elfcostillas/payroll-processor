@@ -31,6 +31,11 @@ class GovernmentContributionService
         return $this->phic_service->compute($period,$employee);
     }  
 
+    public function computeWTax($period,$employee)
+    {
+        return $this->wtax_service->compute($period,$employee);
+    }  
+
 }
 
 /*
@@ -46,6 +51,7 @@ deduct_hdmf
 hdmf_contri
 
 tin_no
+
 manual_wtax
 deduct_wtax 
 

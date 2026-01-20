@@ -14,6 +14,10 @@ use App\Repositories\PayrollRegister\PayrollRegisterRepository;
 use App\Services\Compensation\CompensationService;
 use App\Services\Compensation\FixedCompensationService;
 use App\Services\Compensation\OtherCompensationService;
+use App\Services\Deductions\CompanyDeductions\FixedDeductionService;
+use App\Services\Deductions\CompanyDeductions\GovernmentLoansService;
+use App\Services\Deductions\CompanyDeductions\InstallmentsService;
+use App\Services\Deductions\CompanyDeductions\OneTimeDeductionService;
 use App\Services\Deductions\GovernmentContribution\GovernmentContributionService;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +32,12 @@ class NonConfiService
         protected FixedCompensationService $fixedCompensationService,
         protected OtherCompensationService $otherCompensationService,
         protected CompensationService $compensationService,
-        protected GovernmentContributionService $gov_contri_service
+        protected GovernmentContributionService $gov_contri_service,
+        protected OneTimeDeductionService $otd_service,
+        protected InstallmentsService $installments_service,
+        protected GovernmentLoansService $government_loans_service,
+        protected FixedDeductionService $fixed_deduction_service
+        
         ) {
     }
 
@@ -49,7 +58,13 @@ class NonConfiService
             $grossPayStrategy = GrossPayStrategyFactory::getStrategy($employee->pay_type);
            
             $this->fixedCompensationService->run($employee,$period,$user_id);    
-            $this->otherCompensationService->run($employee,$period,$user_id);   
+            $this->otherCompensationService->run($employee,$period,$user_id); 
+          
+            $this->otd_service->run($employeeObj,$period,$user_id);
+            $this->fixed_deduction_service->run($employeeObj,$period,$user_id);
+            $this->government_loans_service->run($employeeObj,$period,$user_id);
+            $this->installments_service->run($employeeObj,$period,$user_id);
+
            
             $dtr = $this->dailyTimeRecordRepository->getDTRByPeriodAndEmployee($period,$employee);
             // $restDayStrategy = RestDayStrategyFactory::getStrategy($employee->pay_type);
@@ -78,7 +93,12 @@ class NonConfiService
                     ->computeGrossPay($grossPayStrategy)
                     ->computeGrossTotal($this->compensationService,$user_id)
                     ->computeGovernmentContributions($this->gov_contri_service)
-
+                    ->computeOneTimeDeduction($this->otd_service,$user_id)
+                    ->computeFixedDeduction($this->fixed_deduction_service,$user_id)
+                    ->computeGovernmentLoans($this->government_loans_service,$user_id)
+                    ->computeOfficeInstallment($this->installments_service,$user_id)
+                    ->getTotalDeduction()
+                    ->getNetPay()
                     ->getFields()
                    
                     // ->computeSVLAmount()
@@ -108,7 +128,7 @@ class NonConfiService
             'unposted_onetime_deductions',
             'unposted_installments',
             'unposted_fixed_deductions',
-            'unposted_loans_sg',
+            'unposted_loans',
 
             'unposted_fixed_compensations',
             'unposted_other_compensations',

@@ -19,4 +19,6 @@ class FixedCompensationRepository
                 ])
                 ->get();
     }
+
+
 }
