@@ -9,6 +9,8 @@ class GrossPayStrategy implements IGrossPay
     {
         return $payregObject['basic_pay']   
                         + $payregObject['vl_wpay_amount']
+                        + $payregObject['semi_monthly_allowance']
+                        + $payregObject['daily_allowance']
                         + $payregObject['sl_wpay_amount']
                         + $payregObject['bl_wpay_amount']
                         + $payregObject['brv_amount']
@@ -39,16 +41,4 @@ class GrossPayStrategy implements IGrossPay
                         + $payregObject['sphol_rdndot_amount'];                      ;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 

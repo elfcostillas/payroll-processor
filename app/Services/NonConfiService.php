@@ -94,6 +94,7 @@ class NonConfiService
                     ->computeSpecialHolidayAndPremumAmount()
 
                     ->computeBasicPay($basicPayStrategy)
+                    ->computeAllowance()
                     ->computeGrossPay($grossPayStrategy)
                     ->computeGrossTotal($this->compensationService,$user_id)
                     ->computeGovernmentContributions($this->gov_contri_service)

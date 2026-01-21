@@ -330,6 +330,17 @@ class PayregEmployeeBuilder implements IPayregEmployee
         return $this;
     }
 
+    public function computeAllowance()
+    {
+        // $this->fields//semi_monthly_allowance // daily_allowance 
+        //employeeObject->monthly_allowance //daily_allowance
+
+        $this->fields['semi_monthly_allowance'] = (is_null($this->employeeObject->getField('monthly_allowance'))) ? 0.00 : round($this->employeeObject->getField('monthly_allowance')/2,2);
+        $this->fields['daily_allowance'] = (is_null($this->employeeObject->getField('daily_allowance'))) ? 0.00 : round($this->employeeObject->getField('daily_allowance') * $this->fields['ndays'],2);
+        // $this->fields['semi_monthly_allowance'] = round($,2);
+        return $this;
+    }
+
     public function computeGrossPay($grossPayStrategy)
     {
         $this->fields['gross_pay'] = $grossPayStrategy->compute($this->fields);
