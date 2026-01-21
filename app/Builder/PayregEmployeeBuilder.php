@@ -52,6 +52,8 @@ class PayregEmployeeBuilder implements IPayregEmployee
         $this->fields['biometric_id'] = (int) $this->employeeObject->getBioId();
         $this->fields['period_id'] = (int) $this->period->id;
 
+        $this->fields['emp_level'] = ($this->employeeObject->getField('emp_level')>= 5) ? 'non-confi' : 'confi';
+
         return $this;
     }
 
