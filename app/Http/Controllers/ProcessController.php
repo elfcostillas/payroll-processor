@@ -30,6 +30,8 @@ class ProcessController extends Controller
         if($period) {
             $service->process($period,$user_id);
         }
+
+        return response()->json([ 'status' => true ]);
         
     }
 

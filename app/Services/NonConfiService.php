@@ -48,9 +48,12 @@ class NonConfiService
         $schema = $this->payrollRegisterRepository->getSchema('unposted');
         $this->clearTemporaryData($period,$user_id);
 
+        $processed_arr = [];
+
         $generated_on = now();
 
         foreach($employees as $employee) {
+          
             $employeeObj = new Employee($this->nonConfiRepository->find($employee->biometric_id));
             $dailyRateStrategy = DailyRateStrategyFactory::getStrategy($employee->pay_type);
             $builder = new PayregEmployeeBuilder();
@@ -67,9 +70,10 @@ class NonConfiService
 
            
             $dtr = $this->dailyTimeRecordRepository->getDTRByPeriodAndEmployee($period,$employee);
+            
             // $restDayStrategy = RestDayStrategyFactory::getStrategy($employee->pay_type);
 
-            $builder->setEmployee($employeeObj)
+            $row_arr = $builder->setEmployee($employeeObj)
                     ->setDailyRateStrategy($dailyRateStrategy)
                     ->setEmployeeDailyTimeRecord($dtr)
                     ->setSchema($schema)
@@ -99,20 +103,14 @@ class NonConfiService
                     ->computeOfficeInstallment($this->installments_service,$user_id)
                     ->getTotalDeduction()
                     ->getNetPay()
-                    ->getFields()
-                   
-                    // ->computeSVLAmount()
-                    
-                    
-                    ;
+                    ->getFields();
 
-
-            /*
-                make factory for strategy for ComputeDailyRate Daily / MOnhtly
-            */
-            
-            
+                array_push($processed_arr,$row_arr);
         }
+
+        $result = DB::table('payrollregister_unposted_s')->insert($processed_arr);
+
+        return true;
     } 
 
     public function clearTemporaryData($period,$user_id)

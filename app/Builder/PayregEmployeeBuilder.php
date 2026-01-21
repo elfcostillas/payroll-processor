@@ -32,9 +32,6 @@ class PayregEmployeeBuilder implements IPayregEmployee
     protected $govloan_amount;
     protected $installments_amount;
 
-
-    
-
     /*
     * Set employee
     * @param mixed $employeeObject
@@ -101,7 +98,19 @@ class PayregEmployeeBuilder implements IPayregEmployee
         foreach($this->schema as $dataBaseColumn){
             $this->fields[$dataBaseColumn] = null;
         }
+
         unset($this->fields['line_id']);
+
+        foreach($this->dtr as $key => $value)
+        {
+            $exclude = ['id','biometric_id','period_id'];
+
+            if(!in_array($key,$exclude)){
+                if(array_key_exists($key,$this->fields)){
+                    $this->fields[$key] = (float) $value;
+                }
+            }
+        }
 
         return $this;
     }

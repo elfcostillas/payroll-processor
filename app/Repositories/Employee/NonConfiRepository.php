@@ -24,8 +24,8 @@ class NonConfiRepository
     */
 
     public function getAllActive() {
-        return DB::table('employees')->where('emp_level',5)->where('exit_status',1);
-        //->where('biometric_id',847);
+        return DB::table('employees')->where('emp_level',5)->where('exit_status',1)
+        ->where('biometric_id',158);
     }
 
     /**
@@ -36,10 +36,11 @@ class NonConfiRepository
 
     public function getAllWithDTR($period){
      
-        return DB::table('edtr')
-            ->whereBetween('dtr_date',[$period->date_from,$period->date_to])
-            ->whereIn('edtr.biometric_id',$this->getAllActive()->pluck('biometric_id'))
-            ->leftJoin('employees','edtr.biometric_id','employees.biometric_id')
+        return DB::table('edtr_totals')
+            ->where('period_id',$period->id)
+            // ->whereBetween('dtr_date',[$period->date_from,$period->date_to])
+            ->whereIn('edtr_totals.biometric_id',$this->getAllActive()->pluck('biometric_id'))
+            ->leftJoin('employees','edtr_totals.biometric_id','employees.biometric_id')
             ->select('employees.biometric_id','employees.lastname','employees.firstname','employees.pay_type')
             ->distinct()
             ->orderBy('employees.lastname','asc')

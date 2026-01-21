@@ -6,6 +6,9 @@ class DailyBasicPayStrategy implements IBasicPay
 {
     public function compute($payregObject)
     {
-        dd('basic',$payregObject);
+        
+        $basic_pay = round($payregObject['basic_salary'] * $payregObject['ndays']);
+
+        return $basic_pay;
     }
 }
