@@ -23,6 +23,7 @@ class PayregEmployeeBuilder implements IPayregEmployee
 
     protected $dtr;
     protected $period;
+    protected $holidays;
 
     protected $generated_by;
     protected $generated_on;
@@ -39,6 +40,12 @@ class PayregEmployeeBuilder implements IPayregEmployee
 
     public function setEmployee($employeeObject){
         $this->employeeObject = $employeeObject;
+        return $this;
+    }
+
+    public function setHolidays($holidays)
+    {
+        $this->holidays = $holidays;
         return $this;
     }
 
@@ -234,6 +241,23 @@ class PayregEmployeeBuilder implements IPayregEmployee
 
     public function computeLegalHolidayHrsAndPremiumAmount()
     {
+
+        // dd($this->holidays);
+
+        foreach($this->holidays as $holiday){
+           
+            switch($holiday->holiday_type){
+                case 1 : case '1' :
+                    $this->fields['actual_reghol'] += 1;
+                    break;
+                case 2 : case '2' :
+                    $this->fields['actual_sphol'] += 1;
+                    break;
+                case 3 : case '3' :
+                    $this->fields['actual_dblhol'] += 1;
+                    break;
+            }
+        }
 
         $this->fields['leghol_count'] = (float) $this->dtr->reghol_pay;
         $this->fields['leghol_count_amount'] = (float) $this->dtr->reghol_pay * $this->rates['daily_rate'];

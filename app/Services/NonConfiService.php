@@ -19,6 +19,7 @@ use App\Services\Deductions\CompanyDeductions\GovernmentLoansService;
 use App\Services\Deductions\CompanyDeductions\InstallmentsService;
 use App\Services\Deductions\CompanyDeductions\OneTimeDeductionService;
 use App\Services\Deductions\GovernmentContribution\GovernmentContributionService;
+use App\Services\DTR\HolidayService;
 use Illuminate\Support\Facades\DB;
 
 class NonConfiService
@@ -36,7 +37,8 @@ class NonConfiService
         protected OneTimeDeductionService $otd_service,
         protected InstallmentsService $installments_service,
         protected GovernmentLoansService $government_loans_service,
-        protected FixedDeductionService $fixed_deduction_service
+        protected FixedDeductionService $fixed_deduction_service,
+        protected HolidayService $holiday_service
         
         ) {
     }
@@ -53,6 +55,8 @@ class NonConfiService
         $generated_on = now();
 
         foreach($employees as $employee) {
+
+            $holidays = $this->holiday_service->getHolidayCounts($employee->biometric_id,$period->id);
           
             $employeeObj = new Employee($this->nonConfiRepository->find($employee->biometric_id));
             $dailyRateStrategy = DailyRateStrategyFactory::getStrategy($employee->pay_type);
@@ -74,6 +78,7 @@ class NonConfiService
             // $restDayStrategy = RestDayStrategyFactory::getStrategy($employee->pay_type);
 
             $row_arr = $builder->setEmployee($employeeObj)
+                    ->setHolidays($holidays)
                     ->setDailyRateStrategy($dailyRateStrategy)
                     ->setEmployeeDailyTimeRecord($dtr)
                     ->setSchema($schema)
