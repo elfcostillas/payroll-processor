@@ -12,6 +12,7 @@ class GovernmentLoanRepository
         return DB::table('deduction_gov_loans')
                 ->where('biometric_id','=',$employee->getField('biometric_id'))
                 ->where('period_id','<=',$period->id)
+                ->where('is_stopped','=','N')
                 ->get();
     }
 
