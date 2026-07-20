@@ -39,7 +39,7 @@ class NonConfiRepository
             ->where('period_id',$period->id)
             // ->whereBetween('dtr_date',[$period->date_from,$period->date_to])
             ->whereIn('edtr_totals.biometric_id',$this->getAllActive()->pluck('biometric_id'))
-            ->leftJoin('employees','edtr_totals.biometric_id','employees.biometric_id')
+            ->join('employees','edtr_totals.biometric_id','employees.biometric_id')
             ->select('employees.biometric_id','employees.lastname','employees.firstname','employees.pay_type')
             ->where('employees.exit_status',1)
             ->distinct()
