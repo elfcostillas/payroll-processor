@@ -123,7 +123,7 @@ class NonConfiService
     {
         $employees = DB::table('employees')
                     ->where('emp_level',5)
-                    ->where('exit_status',1)
+                    // ->where('exit_status',1)
                     ->select('biometric_id');
 
         $tables = array(
