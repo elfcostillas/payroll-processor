@@ -9,6 +9,6 @@ class DailyBasicPayStrategy implements IBasicPay
         
         $basic_pay = round($payregObject['basic_salary'] * $payregObject['ndays']);
 
-        return $basic_pay;
+        return $basic_pay - $payregObject['late_eq_amount'] - $payregObject['under_time_amount'];
     }
 }
