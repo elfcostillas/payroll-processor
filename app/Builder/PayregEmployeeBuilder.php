@@ -155,7 +155,8 @@ class PayregEmployeeBuilder implements IPayregEmployee
 
     public function computeUnderTimeAmount(){
         $this->fields['under_time'] = (float) $this->dtr->under_time;
-        $this->fields['under_time_amount'] = round($this->dtr->under_time * $this->rates['minutely_rate'],2);
+        // $this->fields['under_time_amount'] = round($this->dtr->under_time * $this->rates['minutely_rate'],2);
+        $this->fields['under_time_amount'] = round($this->dtr->under_time * $this->rates['hourly_rate'],2);
 
         return $this;
     }
