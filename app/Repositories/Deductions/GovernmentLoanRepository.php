@@ -10,9 +10,12 @@ class GovernmentLoanRepository
     {
         
         return DB::table('deduction_gov_loans')
+                ->leftJoin('loan_types','deduction_gov_loans.deduction_type','=','loan_types.id')
                 ->where('biometric_id','=',$employee->getField('biometric_id'))
                 ->where('period_id','<=',$period->id)
                 ->where('is_stopped','=','N')
+                // ->whereIn('loan_types',[3,$period->cut_off])
+                ->where('loan_types','=',$period->cut_off)
                 ->get();
     }
 
